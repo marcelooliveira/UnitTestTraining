@@ -1,4 +1,5 @@
-﻿using ECommerce.Model;
+﻿using ECommerce.DAL;
+using ECommerce.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,13 @@ namespace ECommerce.BLL
 
     public class PedidoManager : IPedidoManager
     {
+        private readonly IPedidoDAL pedidoDAL;
+
+        public PedidoManager(IPedidoDAL pedidoDAL)
+        {
+            this.pedidoDAL = pedidoDAL;
+        }
+
         public void AdicionarItem(string codigo, int quantidade)
         {
             throw new NotImplementedException();
@@ -30,11 +38,7 @@ namespace ECommerce.BLL
 
         public Pedido CriarPedido(string cliente)
         {
-            Pedido pedido = new Pedido();
-            pedido.Cliente = cliente;
-            pedido.Status = PedidoStatus.Aberto;
-            pedido.Itens = new List<ItemPedido>();
-            return pedido;
+            return pedidoDAL.Create(cliente);
         }
 
         public void FecharPedido(Pedido pedido)
