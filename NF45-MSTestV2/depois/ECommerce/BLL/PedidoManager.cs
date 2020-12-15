@@ -41,6 +41,11 @@ namespace ECommerce.BLL
 
         public Pedido CriarPedido(string cliente)
         {
+            if (string.IsNullOrWhiteSpace(cliente))
+            {
+                throw new ArgumentNullException(cliente);
+            }
+
             Pedido pedido = null;
             try
             {

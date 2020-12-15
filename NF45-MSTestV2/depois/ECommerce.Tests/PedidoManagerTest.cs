@@ -38,6 +38,23 @@ namespace ECommerce.Tests
         }
 
         [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        [DataRow("   ")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void CriarPedido_Cliente_Nao_Informado(string cliente)
+        {
+            //arrange
+            Mock<IPedidoDAL> pedidoDALMock = new Mock<IPedidoDAL>();
+            Mock<ILog> loggerMock = new Mock<ILog>();
+            var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object);
+
+            //act
+            pedidoManager.CriarPedido(cliente);
+        }
+
+        [TestMethod]
         [DataRow(1000, "Fulano de Tal")]
         [DataRow(1001, "Maria Bonita")]
         [DataRow(1002, "Zé Pequeno")]
