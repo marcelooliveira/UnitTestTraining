@@ -14,18 +14,26 @@ namespace ECommerce.Tests
     [TestClass]
     public class PedidoManagerTest
     {
+        private Mock<IPedidoDAL> pedidoDALMock;
+        private Mock<ILog> loggerMock;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            this.pedidoDALMock = new Mock<IPedidoDAL>();
+            this.loggerMock = new Mock<ILog>();
+        }
+
         [TestMethod]
         [ExpectedException(typeof(ApplicationException))]
         public void CriarPedido_Erro_BancoDeDados()
         {
             //arrange
-            Mock<IPedidoDAL> pedidoDALMock = new Mock<IPedidoDAL>();
             pedidoDALMock
                 .Setup(x => x.Create(It.IsAny<string>()))
                 .Throws(new ApplicationException("Erro ao criar pedido no banco de dados."))
                 .Verifiable();
 
-            Mock<ILog> loggerMock = new Mock<ILog>();
             loggerMock
                 .Setup(x => x.Error("Erro ao criar pedido no banco de dados."))
                 .Verifiable();
@@ -46,8 +54,6 @@ namespace ECommerce.Tests
         public void CriarPedido_Cliente_Nao_Informado(string cliente)
         {
             //arrange
-            Mock<IPedidoDAL> pedidoDALMock = new Mock<IPedidoDAL>();
-            Mock<ILog> loggerMock = new Mock<ILog>();
             var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object);
 
             //act
@@ -60,7 +66,6 @@ namespace ECommerce.Tests
         [DataRow(1002, "Zé Pequeno")]
         public void CriarPedido_Success(int pedidoId, string cliente)
         {
-            Mock<IPedidoDAL> pedidoDALMock = new Mock<IPedidoDAL>();
             pedidoDALMock
                 .Setup(x => x.Create(cliente))
                 .Returns(new Model.Pedido()
@@ -72,7 +77,6 @@ namespace ECommerce.Tests
                     Total = 0
                 });
 
-            Mock<ILog> loggerMock = new Mock<ILog>();
             loggerMock
                 .Setup(x => x.Info($"Pedido {pedidoId} gravado com sucesso."))
                 .Verifiable();
