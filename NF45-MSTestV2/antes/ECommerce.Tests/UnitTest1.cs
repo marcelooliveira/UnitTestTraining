@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace ECommerce.Tests
 {
     [TestClass]
-    public class PedidoManagerTest
+    public class UnitTest1
     {
         [TestMethod]
         public void TestMethod1()
