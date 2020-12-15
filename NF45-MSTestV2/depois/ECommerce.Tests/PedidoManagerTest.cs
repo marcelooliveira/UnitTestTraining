@@ -13,15 +13,18 @@ namespace ECommerce.Tests
     public class PedidoManagerTest
     {
         [TestMethod]
-        public void CriarPedido_Success()
+        [DataRow(1000, "Fulano de Tal")]
+        [DataRow(1001, "Maria Bonita")]
+        [DataRow(1002, "Zé Pequeno")]
+        public void CriarPedido_Success(int pedidoId, string cliente)
         {
             Mock<IPedidoDAL> pedidoDALMock = new Mock<IPedidoDAL>();
             pedidoDALMock
-                .Setup(x => x.Create("Fulano de Tal"))
+                .Setup(x => x.Create(cliente))
                 .Returns(new Model.Pedido()
                 {
-                    Id = 1000,
-                    Cliente = "Fulano de Tal",
+                    Id = pedidoId,
+                    Cliente = cliente,
                     Itens = new List<Model.ItemPedido>(),
                     Status = Model.PedidoStatus.Aberto,
                     Total = 0
@@ -31,7 +34,7 @@ namespace ECommerce.Tests
             IPedidoManager pedidoManager = new PedidoManager(pedidoDALMock.Object);
             
             //act
-            var pedido = pedidoManager.CriarPedido("Fulano de Tal");
+            var pedido = pedidoManager.CriarPedido(cliente);
 
             //assert
             //Assert.AreEqual(Model.PedidoStatus.Aberto, pedido.Status);
@@ -43,10 +46,10 @@ namespace ECommerce.Tests
             // Efetua todas as validações, mesmo que uma falhe
             using (new AssertionScope())
             {
-                pedido.Id.Should().Be(1000);
+                pedido.Id.Should().Be(pedidoId);
                 pedido.Total.Should().Be(0);
                 pedido.Status.Should().Be(Model.PedidoStatus.Aberto);
-                pedido.Cliente.Should().Be("Fulano de Tal");
+                pedido.Cliente.Should().Be(cliente);
                 pedido.Itens.Should().BeEmpty();
             }
         }
