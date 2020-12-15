@@ -15,6 +15,29 @@ namespace ECommerce.Tests
     public class PedidoManagerTest
     {
         [TestMethod]
+        [ExpectedException(typeof(ApplicationException))]
+        public void CriarPedido_Erro_BancoDeDados()
+        {
+            //arrange
+            Mock<IPedidoDAL> pedidoDALMock = new Mock<IPedidoDAL>();
+            pedidoDALMock
+                .Setup(x => x.Create(It.IsAny<string>()))
+                .Throws(new ApplicationException("Erro ao criar pedido no banco de dados."))
+                .Verifiable();
+
+            Mock<ILog> loggerMock = new Mock<ILog>();
+            loggerMock
+                .Setup(x => x.Error("Erro ao criar pedido no banco de dados."))
+                .Verifiable();
+
+            //act
+            PedidoManager pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object);
+
+            //assert
+            var pedido = pedidoManager.CriarPedido("Fulano de Tal");
+        }
+
+        [TestMethod]
         [DataRow(1000, "Fulano de Tal")]
         [DataRow(1001, "Maria Bonita")]
         [DataRow(1002, "Zé Pequeno")]
@@ -62,6 +85,7 @@ namespace ECommerce.Tests
 
             Mock.Verify(pedidoDALMock);
             Mock.Verify(loggerMock);
+            loggerMock.Verify(x => x.Info($"Pedido {pedidoId} gravado com sucesso."), Times.Once);
         }
     }
 }

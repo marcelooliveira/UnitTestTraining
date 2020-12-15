@@ -41,8 +41,18 @@ namespace ECommerce.BLL
 
         public Pedido CriarPedido(string cliente)
         {
-            Pedido pedido = pedidoDAL.Create(cliente);
-            log.Info($"Pedido {pedido.Id} gravado com sucesso.");
+            Pedido pedido = null;
+            try
+            {
+                pedido = pedidoDAL.Create(cliente);
+                log.Info($"Pedido {pedido.Id} gravado com sucesso.");
+            }
+            catch (Exception exc)
+            {
+                log.Error("Erro ao criar pedido no banco de dados.");
+                throw;
+            }
+
             return pedido;
         }
 
