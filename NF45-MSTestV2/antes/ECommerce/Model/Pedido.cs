@@ -7,7 +7,7 @@ namespace ECommerce.Model
         public string Cliente { get; set; }
         public List<ItemPedido> Itens { get; set; }
         public decimal Total { get; set; }
-        public PedidoStatus PedidoStatus { get; set; }
+        public PedidoStatus Status { get; set; }
     }
 
     public enum PedidoStatus
