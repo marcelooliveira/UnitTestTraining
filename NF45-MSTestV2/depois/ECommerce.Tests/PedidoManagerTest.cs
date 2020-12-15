@@ -108,5 +108,41 @@ namespace ECommerce.Tests
             Mock.Verify(loggerMock);
             loggerMock.Verify(x => x.Info($"Pedido {pedidoId} gravado com sucesso."), Times.Once);
         }
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        [DataRow("  ")]
+        public void AdicionarItem_Codigo_Invalido(string codigo)
+        {
+            //arrange
+            var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object);
+
+            //act
+            Action action = () => pedidoManager.AdicionarItem(codigo, 1);
+
+            //assert
+            action.Should().Throw<ArgumentNullException>()
+                .And
+                .ParamName.Should().Be("codigo");
+        }
+
+        [TestMethod]
+        [DataRow(-1)]
+        [DataRow(0)]
+        public void AdicionarItem_Quantidade_Invalida(int quantidade)
+        {
+            //arrange
+            var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object);
+
+            //act
+            Action action = () => pedidoManager.AdicionarItem("abc", quantidade);
+
+            //assert
+            action.Should().Throw<ArgumentOutOfRangeException>()
+                .And
+                .ParamName.Should().Be("quantidade");
+        }
     }
 }

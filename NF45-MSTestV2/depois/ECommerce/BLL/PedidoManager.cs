@@ -31,6 +31,16 @@ namespace ECommerce.BLL
 
         public void AdicionarItem(string codigo, int quantidade)
         {
+            if (string.IsNullOrWhiteSpace(codigo))
+            {
+                throw new ArgumentNullException(nameof(codigo));
+            }
+
+            if (quantidade <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(quantidade));
+            }
+
             throw new NotImplementedException();
         }
 
