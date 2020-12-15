@@ -1,5 +1,6 @@
 ﻿using ECommerce.DAL;
 using ECommerce.Model;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +20,12 @@ namespace ECommerce.BLL
 
     public class PedidoManager : IPedidoManager
     {
+        private readonly ILog log;
         private readonly IPedidoDAL pedidoDAL;
 
-        public PedidoManager(IPedidoDAL pedidoDAL)
+        public PedidoManager(ILog log, IPedidoDAL pedidoDAL)
         {
+            this.log = log;
             this.pedidoDAL = pedidoDAL;
         }
 
@@ -38,7 +41,9 @@ namespace ECommerce.BLL
 
         public Pedido CriarPedido(string cliente)
         {
-            return pedidoDAL.Create(cliente);
+            Pedido pedido = pedidoDAL.Create(cliente);
+            log.Info($"Pedido {pedido.Id} gravado com sucesso.");
+            return pedido;
         }
 
         public void FecharPedido(Pedido pedido)

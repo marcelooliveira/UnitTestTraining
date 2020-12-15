@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Castle.Core.Logging;
 using ECommerce.BLL;
 using ECommerce.DAL;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using log4net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -30,8 +32,13 @@ namespace ECommerce.Tests
                     Total = 0
                 });
 
+            Mock<ILog> loggerMock = new Mock<ILog>();
+            loggerMock
+                .Setup(x => x.Info($"Pedido {pedidoId} gravado com sucesso."))
+                .Verifiable();
+
             //arrange
-            IPedidoManager pedidoManager = new PedidoManager(pedidoDALMock.Object);
+            IPedidoManager pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object);
             
             //act
             var pedido = pedidoManager.CriarPedido(cliente);
@@ -52,6 +59,9 @@ namespace ECommerce.Tests
                 pedido.Cliente.Should().Be(cliente);
                 pedido.Itens.Should().BeEmpty();
             }
+
+            Mock.Verify(pedidoDALMock);
+            Mock.Verify(loggerMock);
         }
     }
 }
