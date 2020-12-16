@@ -128,6 +128,22 @@ namespace ECommerce.Tests
         }
 
         [TestMethod]
+        [DataRow(0)]
+        [DataRow(2)]
+        public void AdicionarItem_Pedido_Status_Invalido(int status)
+        {
+            //arrange
+            var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
+            var pedido = new Pedido() { Id = 1, Cliente = "José da Silva", Itens = new List<ItemPedido>(), Status = (PedidoStatus)status, Total = 0 };
+
+            //act
+            Action action = () => pedidoManager.AdicionarItem(pedido, "abc", 1);
+
+            //assert
+            action.Should().Throw<StatusInvalidoException>();
+        }
+
+        [TestMethod]
         [DataRow(null)]
         [DataRow("")]
         [DataRow(" ")]

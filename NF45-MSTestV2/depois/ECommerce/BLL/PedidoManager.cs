@@ -38,6 +38,11 @@ namespace ECommerce.BLL
                 throw new ArgumentNullException(nameof(pedido));
             }
 
+            if (pedido.Status != PedidoStatus.Aberto)
+            {
+                throw new StatusInvalidoException();
+            }
+
             if (string.IsNullOrWhiteSpace(codigo))
             {
                 throw new ArgumentNullException(nameof(codigo));
