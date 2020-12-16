@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="BLL\PedidoManager.cs" />
     <Compile Include="DAL\IPedidoDAL.cs" />
+    <Compile Include="DAL\IProdutoDAL.cs" />
     <Compile Include="Model\BaseModel.cs" />
     <Compile Include="Model\ItemPedido.cs" />
     <Compile Include="Model\Pedido.cs" />

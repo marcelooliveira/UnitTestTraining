@@ -22,11 +22,13 @@ namespace ECommerce.BLL
     {
         private readonly ILog log;
         private readonly IPedidoDAL pedidoDAL;
+        private readonly IProdutoDAL produtoDAL;
 
-        public PedidoManager(ILog log, IPedidoDAL pedidoDAL)
+        public PedidoManager(ILog log, IPedidoDAL pedidoDAL, IProdutoDAL produtoDAL)
         {
             this.log = log;
             this.pedidoDAL = pedidoDAL;
+            this.produtoDAL = produtoDAL;
         }
 
         public void AdicionarItem(string codigo, int quantidade)
@@ -39,6 +41,22 @@ namespace ECommerce.BLL
             if (quantidade <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(quantidade));
+            }
+
+            Produto produto = null;
+            try
+            {
+                produtoDAL.Get(codigo);
+            }
+            catch (KeyNotFoundException exc)
+            {
+                log.Error(exc.Message, exc);
+                throw new ProdutoNaoEncontradoException("Produto não encontrado.", exc);
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc.Message);
+                throw;
             }
 
             throw new NotImplementedException();
@@ -64,7 +82,7 @@ namespace ECommerce.BLL
             }
             catch (Exception exc)
             {
-                log.Error("Erro ao criar pedido no banco de dados.");
+                log.Error("Erro ao criar pedido no banco de dados.", exc);
                 throw;
             }
 
@@ -85,6 +103,8 @@ namespace ECommerce.BLL
     [Serializable]
     public class ProdutoNaoEncontradoException : Exception
     {
+        public override string Message => "Produto não encontrado.";
+
         public ProdutoNaoEncontradoException() { }
         public ProdutoNaoEncontradoException(string message) : base(message) { }
         public ProdutoNaoEncontradoException(string message, Exception inner) : base(message, inner) { }

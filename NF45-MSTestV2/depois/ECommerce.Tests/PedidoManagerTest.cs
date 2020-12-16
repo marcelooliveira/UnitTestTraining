@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Castle.Core.Logging;
 using ECommerce.BLL;
 using ECommerce.DAL;
+using ECommerce.Model;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using log4net;
@@ -15,11 +16,13 @@ namespace ECommerce.Tests
     public class PedidoManagerTest
     {
         private Mock<IPedidoDAL> pedidoDALMock;
+        private Mock<IProdutoDAL> produtoDALMock;
         private Mock<ILog> loggerMock;
 
         [TestInitialize]
         public void TestInitialize()
         {
+            this.produtoDALMock = new Mock<IProdutoDAL>();
             this.pedidoDALMock = new Mock<IPedidoDAL>();
             this.loggerMock = new Mock<ILog>();
         }
@@ -39,7 +42,7 @@ namespace ECommerce.Tests
                 .Verifiable();
 
             //act
-            PedidoManager pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object);
+            PedidoManager pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
 
             //assert
             var pedido = pedidoManager.CriarPedido("Fulano de Tal");
@@ -54,7 +57,7 @@ namespace ECommerce.Tests
         public void CriarPedido_Cliente_Nao_Informado(string cliente)
         {
             //arrange
-            var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object);
+            var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
 
             //act
             pedidoManager.CriarPedido(cliente);
@@ -82,7 +85,7 @@ namespace ECommerce.Tests
                 .Verifiable();
 
             //arrange
-            IPedidoManager pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object);
+            IPedidoManager pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
             
             //act
             var pedido = pedidoManager.CriarPedido(cliente);
@@ -117,7 +120,7 @@ namespace ECommerce.Tests
         public void AdicionarItem_Codigo_Invalido(string codigo)
         {
             //arrange
-            var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object);
+            var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
 
             //act
             Action action = () => pedidoManager.AdicionarItem(codigo, 1);
@@ -134,7 +137,7 @@ namespace ECommerce.Tests
         public void AdicionarItem_Quantidade_Invalida(int quantidade)
         {
             //arrange
-            var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object);
+            var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
 
             //act
             Action action = () => pedidoManager.AdicionarItem("abc", quantidade);
@@ -143,6 +146,27 @@ namespace ECommerce.Tests
             action.Should().Throw<ArgumentOutOfRangeException>()
                 .And
                 .ParamName.Should().Be("quantidade");
+        }
+
+        [TestMethod]
+        public void AdicionarItem_Produto_Nao_Encontrado()
+        {
+            //arrange
+            KeyNotFoundException exception = new KeyNotFoundException();
+            produtoDALMock
+                .Setup(x => x.Get("abc"))
+                .Throws(exception)
+                .Verifiable();
+
+            var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
+
+            //act
+            Action action = () => pedidoManager.AdicionarItem("abc", 1);
+
+            //assert
+            action.Should().Throw<ProdutoNaoEncontradoException>();
+            produtoDALMock.Verify();
+            loggerMock.Verify(x => x.Error(exception.Message, exception));
         }
     }
 }

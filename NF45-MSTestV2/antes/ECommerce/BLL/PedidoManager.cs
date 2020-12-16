@@ -47,6 +47,7 @@ namespace ECommerce.BLL
     [Serializable]
     public class ProdutoNaoEncontradoException : Exception
     {
+        public override string Message => "Produto não encontrado.";
         public ProdutoNaoEncontradoException() { }
         public ProdutoNaoEncontradoException(string message) : base(message) { }
         public ProdutoNaoEncontradoException(string message, Exception inner) : base(message, inner) { }
