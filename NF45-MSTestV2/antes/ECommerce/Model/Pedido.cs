@@ -8,6 +8,14 @@ namespace ECommerce.Model
         public List<ItemPedido> Itens { get; set; }
         public decimal Total { get; set; }
         public PedidoStatus Status { get; set; }
+
+        protected override IEnumerable<object> GetAtomicValues()
+        {
+            yield return Cliente;
+            yield return Itens;
+            yield return Total;
+            yield return Status;
+        }
     }
 
     public enum PedidoStatus

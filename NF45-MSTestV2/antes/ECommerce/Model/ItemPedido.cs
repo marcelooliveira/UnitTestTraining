@@ -1,4 +1,6 @@
-﻿namespace ECommerce.Model
+﻿using System.Collections.Generic;
+
+namespace ECommerce.Model
 {
     public class ItemPedido : BaseModel
     {
@@ -13,5 +15,12 @@
         public int Quantidade { get; set; }
         public decimal PrecoUnitario { get; set; }
         public decimal Subtotal => Quantidade * PrecoUnitario;
+
+        protected override IEnumerable<object> GetAtomicValues()
+        {
+            yield return ProdutoId;
+            yield return Quantidade;
+            yield return PrecoUnitario;
+        }
     }
 }

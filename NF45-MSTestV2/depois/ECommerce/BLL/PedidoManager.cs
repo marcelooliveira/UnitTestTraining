@@ -12,9 +12,9 @@ namespace ECommerce.BLL
     public interface IPedidoManager
     {
         Pedido CriarPedido(string cliente);
-        void AdicionarItem(string codigo, int quantidade);
-        void RemoverItem(string codigo);
-        void AtualizarItem(string codigo, int quantidade);
+        ItemPedido AdicionarItem(Pedido pedido, string codigo, int quantidade);
+        void RemoverItem(Pedido pedido, string codigo);
+        void AtualizarItem(Pedido pedido, string codigo, int quantidade);
         void FecharPedido(Pedido pedido);
     }
 
@@ -31,7 +31,7 @@ namespace ECommerce.BLL
             this.produtoDAL = produtoDAL;
         }
 
-        public void AdicionarItem(string codigo, int quantidade)
+        public ItemPedido AdicionarItem(Pedido pedido, string codigo, int quantidade)
         {
             if (string.IsNullOrWhiteSpace(codigo))
             {
@@ -46,7 +46,7 @@ namespace ECommerce.BLL
             Produto produto = null;
             try
             {
-                produtoDAL.Get(codigo);
+                produto = produtoDAL.Get(codigo);
             }
             catch (KeyNotFoundException exc)
             {
@@ -59,10 +59,14 @@ namespace ECommerce.BLL
                 throw;
             }
 
-            throw new NotImplementedException();
+            var itemPedido = new ItemPedido(produto.Id, quantidade, produto.PrecoUnitario);
+
+            pedidoDAL.AddItem(pedido, itemPedido);
+
+            return itemPedido;
         }
 
-        public void AtualizarItem(string codigo, int quantidade)
+        public void AtualizarItem(Pedido pedido, string codigo, int quantidade)
         {
             throw new NotImplementedException();
         }
@@ -94,7 +98,7 @@ namespace ECommerce.BLL
             throw new NotImplementedException();
         }
 
-        public void RemoverItem(string codigo)
+        public void RemoverItem(Pedido pedido, string codigo)
         {
             throw new NotImplementedException();
         }

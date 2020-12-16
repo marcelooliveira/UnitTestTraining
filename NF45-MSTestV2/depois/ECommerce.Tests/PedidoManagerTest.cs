@@ -120,10 +120,22 @@ namespace ECommerce.Tests
         public void AdicionarItem_Codigo_Invalido(string codigo)
         {
             //arrange
+            pedidoDALMock
+            .Setup(x => x.Create("José da Silva"))
+            .Returns(new Model.Pedido()
+            {
+                Id = 1000,
+                Cliente = "José da Silva",
+                Itens = new List<Model.ItemPedido>(),
+                Status = Model.PedidoStatus.Aberto,
+                Total = 0
+            });
+
             var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
 
             //act
-            Action action = () => pedidoManager.AdicionarItem(codigo, 1);
+            var pedido = pedidoManager.CriarPedido("José da Silva");
+            Action action = () => pedidoManager.AdicionarItem(pedido, codigo, 1);
 
             //assert
             action.Should().Throw<ArgumentNullException>()
@@ -137,10 +149,21 @@ namespace ECommerce.Tests
         public void AdicionarItem_Quantidade_Invalida(int quantidade)
         {
             //arrange
+            pedidoDALMock
+                .Setup(x => x.Create("José da Silva"))
+                .Returns(new Model.Pedido()
+                {
+                    Id = 1000,
+                    Cliente = "José da Silva",
+                    Itens = new List<Model.ItemPedido>(),
+                    Status = Model.PedidoStatus.Aberto,
+                    Total = 0
+                });
             var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
 
             //act
-            Action action = () => pedidoManager.AdicionarItem("abc", quantidade);
+            var pedido = pedidoManager.CriarPedido("José da Silva");
+            Action action = () => pedidoManager.AdicionarItem(pedido, "abc", quantidade);
 
             //assert
             action.Should().Throw<ArgumentOutOfRangeException>()
@@ -152,6 +175,17 @@ namespace ECommerce.Tests
         public void AdicionarItem_Produto_Nao_Encontrado()
         {
             //arrange
+            pedidoDALMock
+                .Setup(x => x.Create("José da Silva"))
+                .Returns(new Model.Pedido()
+                {
+                    Id = 1000,
+                    Cliente = "José da Silva",
+                    Itens = new List<Model.ItemPedido>(),
+                    Status = Model.PedidoStatus.Aberto,
+                    Total = 0
+                });
+
             KeyNotFoundException exception = new KeyNotFoundException();
             produtoDALMock
                 .Setup(x => x.Get("abc"))
@@ -161,12 +195,74 @@ namespace ECommerce.Tests
             var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
 
             //act
-            Action action = () => pedidoManager.AdicionarItem("abc", 1);
+            var pedido = pedidoManager.CriarPedido("José da Silva");
+            Action action = () => pedidoManager.AdicionarItem(pedido, "abc", 1);
 
             //assert
             action.Should().Throw<ProdutoNaoEncontradoException>();
             produtoDALMock.Verify();
             loggerMock.Verify(x => x.Error(exception.Message, exception));
+        }
+
+        [TestMethod]
+        [DataRow(1, "abc", 1, 10)]
+        [DataRow(2, "def", 1, 20)]
+        [DataRow(3, "ghi", 1, 30)]
+        public void AdicionarItem_Success(int produtoId, string codigo, int quantidade, double precoUnitario)
+        {
+            //arrange
+            var p = new Model.Pedido()
+              {
+                  Id = 1000,
+                  Cliente = "José da Silva",
+                  Itens = new List<Model.ItemPedido>(),
+                  Status = Model.PedidoStatus.Aberto,
+                  Total = 0
+              };
+            var i = new Model.ItemPedido(produtoId, quantidade, (decimal)precoUnitario);
+
+            pedidoDALMock
+                .Setup(x => x.Create("José da Silva"))
+                .Returns(p)
+                .Verifiable();
+
+            pedidoDALMock
+                .Setup(x => x.AddItem(p, i))
+                .Callback(() =>
+                {
+                    p.Itens.Add(i);
+                })
+                .Verifiable();
+
+            KeyNotFoundException exception = new KeyNotFoundException();
+            produtoDALMock
+                .Setup(x => x.Get("abc"))
+                .Returns(new Produto("abc", "produto abc", 10.0m) { Id = 1 });
+
+            produtoDALMock
+                .Setup(x => x.Get("def"))
+                .Returns(new Produto("def", "produto def", 20.0m) { Id = 2 });
+
+            produtoDALMock
+                .Setup(x => x.Get("ghi"))
+                .Returns(new Produto("ghi", "produto ghi", 30.0m) { Id = 3 });
+
+            var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
+
+            //act
+            var pedido = pedidoManager.CriarPedido("José da Silva");
+            var item = pedidoManager.AdicionarItem(pedido, codigo, quantidade);
+
+            //assert
+            produtoDALMock.Verify(x => x.Get(codigo));
+            pedidoDALMock.Verify();
+            
+            pedido.Itens
+                .Should().NotBeEmpty()
+                .And
+                .HaveCount(1)
+                .And
+                .Contain(new ItemPedido(produtoId, quantidade, (decimal)precoUnitario));
         }
     }
 }

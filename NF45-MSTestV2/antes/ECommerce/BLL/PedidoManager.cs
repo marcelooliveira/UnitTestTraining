@@ -10,20 +10,20 @@ namespace ECommerce.BLL
     public interface IPedidoManager
     {
         Pedido CriarPedido(string cliente);
-        void AdicionarItem(string codigo, int quantidade);
-        void RemoverItem(string codigo);
-        void AtualizarItem(string codigo, int quantidade);
+        ItemPedido AdicionarItem(Pedido pedido, string codigo, int quantidade);
+        void RemoverItem(Pedido pedido, string codigo);
+        void AtualizarItem(Pedido pedido, string codigo, int quantidade);
         void FecharPedido(Pedido pedido);
     }
 
     public class PedidoManager : IPedidoManager
     {
-        public void AdicionarItem(string codigo, int quantidade)
+        public ItemPedido AdicionarItem(Pedido pedido, string codigo, int quantidade)
         {
             throw new NotImplementedException();
         }
 
-        public void AtualizarItem(string codigo, int quantidade)
+        public void AtualizarItem(Pedido pedido, string codigo, int quantidade)
         {
             throw new NotImplementedException();
         }
@@ -38,7 +38,7 @@ namespace ECommerce.BLL
             throw new NotImplementedException();
         }
 
-        public void RemoverItem(string codigo)
+        public void RemoverItem(Pedido pedido, string codigo)
         {
             throw new NotImplementedException();
         }
