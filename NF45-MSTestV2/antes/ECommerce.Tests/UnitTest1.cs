@@ -3,6 +3,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ECommerce.Tests
 {
+    /// fusca
+    /// < image url="https://cdn.pixabay.com/photo/2013/07/13/10/21/volkswagen-157030__340.png" scale="0.5"/>
+    
+    /// motor
+    /// < image url = "https://cdn.pixabay.com/photo/2013/07/13/12/44/engine-160230__340.png" scale="0.5" />
+    
+    /// caixa de câmbio    
+    /// < image url="http://www.ajautomatics.co.uk/images/content-images/aj-automatics2.jpg" scale="0.2"/>
     [TestClass]
     public class UnitTest1
     {
