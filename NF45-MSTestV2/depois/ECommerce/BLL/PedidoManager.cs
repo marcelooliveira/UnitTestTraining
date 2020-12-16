@@ -33,6 +33,11 @@ namespace ECommerce.BLL
 
         public ItemPedido AdicionarItem(Pedido pedido, string codigo, int quantidade)
         {
+            if (pedido == null)
+            {
+                throw new ArgumentNullException(nameof(pedido));
+            }
+
             if (string.IsNullOrWhiteSpace(codigo))
             {
                 throw new ArgumentNullException(nameof(codigo));

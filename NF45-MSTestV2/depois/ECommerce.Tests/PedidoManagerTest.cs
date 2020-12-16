@@ -113,6 +113,21 @@ namespace ECommerce.Tests
         }
 
         [TestMethod]
+        public void AdicionarItem_Pedido_Nulo()
+        {
+            //arrange
+            var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
+
+            //act
+            Action action = () => pedidoManager.AdicionarItem(null, "abc", 1);
+
+            //assert
+            action.Should().Throw<ArgumentNullException>()
+                .And
+                .ParamName.Should().Be("pedido");
+        }
+
+        [TestMethod]
         [DataRow(null)]
         [DataRow("")]
         [DataRow(" ")]
@@ -132,9 +147,9 @@ namespace ECommerce.Tests
             });
 
             var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
+            var pedido = pedidoManager.CriarPedido("José da Silva");
 
             //act
-            var pedido = pedidoManager.CriarPedido("José da Silva");
             Action action = () => pedidoManager.AdicionarItem(pedido, codigo, 1);
 
             //assert
@@ -160,9 +175,9 @@ namespace ECommerce.Tests
                     Total = 0
                 });
             var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
+            var pedido = pedidoManager.CriarPedido("José da Silva");
 
             //act
-            var pedido = pedidoManager.CriarPedido("José da Silva");
             Action action = () => pedidoManager.AdicionarItem(pedido, "abc", quantidade);
 
             //assert
@@ -193,9 +208,9 @@ namespace ECommerce.Tests
                 .Verifiable();
 
             var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
+            var pedido = pedidoManager.CriarPedido("José da Silva");
 
             //act
-            var pedido = pedidoManager.CriarPedido("José da Silva");
             Action action = () => pedidoManager.AdicionarItem(pedido, "abc", 1);
 
             //assert
@@ -248,9 +263,9 @@ namespace ECommerce.Tests
                 .Returns(new Produto("ghi", "produto ghi", 30.0m) { Id = 3 });
 
             var pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALMock.Object, produtoDALMock.Object);
+            var pedido = pedidoManager.CriarPedido("José da Silva");
 
             //act
-            var pedido = pedidoManager.CriarPedido("José da Silva");
             var item = pedidoManager.AdicionarItem(pedido, codigo, quantidade);
 
             //assert
