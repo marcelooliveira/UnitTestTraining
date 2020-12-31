@@ -1,4 +1,5 @@
-﻿using ECommerce.Model;
+﻿using ECommerce.DAL;
+using ECommerce.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +19,57 @@ namespace ECommerce.BLL
 
     public class PedidoManager : IPedidoManager
     {
+        private readonly IPedidoDAL pedidoDAL;
+        private readonly IProdutoDAL produtoDAL;
+
+        public PedidoManager(IPedidoDAL pedidoDAL, IProdutoDAL produtoDAL)
+        {
+            if (pedidoDAL == null)
+            {
+                throw new ArgumentNullException(nameof(pedidoDAL));
+            }
+
+            if (produtoDAL == null)
+            {
+                throw new ArgumentNullException(nameof(produtoDAL));
+            }
+
+            this.pedidoDAL = pedidoDAL;
+            this.produtoDAL = produtoDAL;
+        }
+
         public ItemPedido AdicionarItem(Pedido pedido, string codigo, int quantidade)
         {
-            throw new NotImplementedException();
+            if (pedido == null)
+            {
+                throw new ArgumentNullException(nameof(pedido));
+            }
+
+            if (string.IsNullOrWhiteSpace(codigo))
+            {
+                throw new ArgumentNullException(nameof(codigo));
+            }
+
+            if (quantidade < 1)
+            {
+                throw new ArgumentNullException(nameof(quantidade));
+            }
+
+            if (pedido.Status != PedidoStatus.Aberto)
+            {
+                throw new StatusInvalidoException();
+            }
+
+            var produto = produtoDAL.Get(codigo);
+
+            if (produto == null)
+            {
+                throw new ProdutoNaoEncontradoException();
+            }
+
+            var itemPedido = new ItemPedido(produto.Id, quantidade, produto.PrecoUnitario);
+            pedido.Itens.Add(itemPedido);
+            return itemPedido;
         }
 
         public void AtualizarItem(Pedido pedido, string codigo, int quantidade)
@@ -30,7 +79,13 @@ namespace ECommerce.BLL
 
         public Pedido CriarPedido(string cliente)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(cliente))
+            {
+                throw new ArgumentNullException(nameof(cliente));
+            }
+
+            Pedido pedido = pedidoDAL.Create(cliente);
+            return pedido;
         }
 
         public void FecharPedido(Pedido pedido)

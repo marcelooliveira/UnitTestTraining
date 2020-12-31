@@ -5,7 +5,7 @@ namespace ECommerce.Model
     public class Pedido : BaseModel
     {
         public string Cliente { get; set; }
-        public List<ItemPedido> Itens { get; set; }
+        public List<ItemPedido> Itens { get; set; } = new List<ItemPedido>();
         public decimal Total { get; set; }
         public PedidoStatus Status { get; set; }
 
