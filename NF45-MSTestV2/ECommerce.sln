@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "antes", "antes", "{A63D096A-36F1-4717-A487-98D01A54DA59}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "parte1_finalizado", "parte1_finalizado", "{A63D096A-36F1-4717-A487-98D01A54DA59}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "depois", "depois", "{81078672-5F49-4803-84FF-3E11965BE366}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "parte2_exercicios", "parte2_exercicios", "{81078672-5F49-4803-84FF-3E11965BE366}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECommerce", "antes\ECommerce\ECommerce.csproj", "{0B757B1C-E6A0-48F3-879A-258D118B8041}"
 EndProject
