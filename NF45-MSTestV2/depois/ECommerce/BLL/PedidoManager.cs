@@ -20,60 +20,15 @@ namespace ECommerce.BLL
 
     public class PedidoManager : IPedidoManager
     {
-        private readonly ILog log;
-        private readonly IPedidoDAL pedidoDAL;
-        private readonly IProdutoDAL produtoDAL;
-
-        public PedidoManager(ILog log, IPedidoDAL pedidoDAL, IProdutoDAL produtoDAL)
-        {
-            this.log = log;
-            this.pedidoDAL = pedidoDAL;
-            this.produtoDAL = produtoDAL;
-        }
 
         public ItemPedido AdicionarItem(Pedido pedido, string codigo, int quantidade)
         {
-            if (pedido == null)
-            {
-                throw new ArgumentNullException(nameof(pedido));
-            }
+            throw NotImplementedException();
+        }
 
-            if (pedido.Status != PedidoStatus.Aberto)
-            {
-                throw new StatusInvalidoException();
-            }
-
-            if (string.IsNullOrWhiteSpace(codigo))
-            {
-                throw new ArgumentNullException(nameof(codigo));
-            }
-
-            if (quantidade <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(quantidade));
-            }
-
-            Produto produto = null;
-            try
-            {
-                produto = produtoDAL.Get(codigo);
-            }
-            catch (KeyNotFoundException exc)
-            {
-                log.Error(exc.Message, exc);
-                throw new ProdutoNaoEncontradoException("Produto não encontrado.", exc);
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc.Message);
-                throw;
-            }
-
-            var itemPedido = new ItemPedido(produto.Id, quantidade, produto.PrecoUnitario);
-
-            pedidoDAL.AddItem(pedido, itemPedido);
-
-            return itemPedido;
+        private Exception NotImplementedException()
+        {
+            throw new NotImplementedException();
         }
 
         public void AtualizarItem(Pedido pedido, string codigo, int quantidade)
@@ -83,24 +38,7 @@ namespace ECommerce.BLL
 
         public Pedido CriarPedido(string cliente)
         {
-            if (string.IsNullOrWhiteSpace(cliente))
-            {
-                throw new ArgumentNullException(cliente);
-            }
-
-            Pedido pedido = null;
-            try
-            {
-                pedido = pedidoDAL.Create(cliente);
-                log.Info($"Pedido {pedido.Id} gravado com sucesso.");
-            }
-            catch (Exception exc)
-            {
-                log.Error("Erro ao criar pedido no banco de dados.", exc);
-                throw;
-            }
-
-            return pedido;
+            throw NotImplementedException();
         }
 
         public void FecharPedido(Pedido pedido)
