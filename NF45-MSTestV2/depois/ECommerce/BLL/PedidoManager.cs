@@ -20,6 +20,14 @@ namespace ECommerce.BLL
 
     public class PedidoManager : IPedidoManager
     {
+        private readonly ILog log;
+        private readonly IPedidoDAL pedidoDAL;
+
+        public PedidoManager(ILog log, IPedidoDAL pedidoDAL)
+        {
+            this.log = log;
+            this.pedidoDAL = pedidoDAL;
+        }
 
         public ItemPedido AdicionarItem(Pedido pedido, string codigo, int quantidade)
         {
@@ -38,7 +46,22 @@ namespace ECommerce.BLL
 
         public Pedido CriarPedido(string cliente)
         {
-            throw NotImplementedException();
+            //var pedido = new Pedido
+            //{
+            //    Cliente = cliente,
+            //    Status = PedidoStatus.Aberto,
+            //    Itens = new List<ItemPedido>()
+            //};
+            //return pedido;
+
+            if (cliente == null)
+            {
+                throw new ArgumentNullException(nameof(cliente));
+            }
+
+            var pedido = pedidoDAL.Create(cliente);
+            log.Info($"Pedido {pedido.Id} gravado com sucesso.");
+            return pedido;
         }
 
         public void FecharPedido(Pedido pedido)
