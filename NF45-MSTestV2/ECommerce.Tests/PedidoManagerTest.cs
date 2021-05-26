@@ -1,5 +1,6 @@
 ﻿using ECommerce.BLL;
 using ECommerce.DAL;
+using ECommerce.Model;
 using FluentAssertions;
 using log4net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,6 +22,18 @@ namespace ECommerce.Tests
     [TestClass]
     public class PedidoManagerTest
     {
+        Mock<ILog> loggerMock;
+        Mock<IPedidoDAL> pedidoDALmock;
+        Mock<IProdutoDAL> produtoDALmock;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            loggerMock = new Mock<ILog>();
+            pedidoDALmock = new Mock<IPedidoDAL>();
+            produtoDALmock = new Mock<IProdutoDAL>();
+        }
+
         [TestMethod]
         [DataRow(1000, "Fulano de Tal")]
         [DataRow(1001, "Maria Bonita")]
@@ -33,14 +46,11 @@ namespace ECommerce.Tests
 
             //Mock = boneco/imitação/fantoche
 
-
-            Mock<ILog> loggerMock = new Mock<ILog>();
             loggerMock
                 .Setup(x => x.Info($"Pedido {pedidoId} gravado com sucesso."))
                 //.Setup(x => x.Info(It.IsAny<string>()))
                 .Verifiable();
 
-            Mock<IPedidoDAL> pedidoDALmock = new Mock<IPedidoDAL>();
             pedidoDALmock
                 .Setup(x => x.Create(It.IsAny<string>()))
                 .Returns(new Model.Pedido()
@@ -53,7 +63,7 @@ namespace ECommerce.Tests
                 })
                 .Verifiable();
 
-            IPedidoManager pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALmock.Object);
+            IPedidoManager pedidoManager = new PedidoManager(loggerMock.Object, pedidoDALmock.Object, produtoDALmock.Object);
 
             //act
             var pedido = pedidoManager.CriarPedido("Fulano de Tal");
@@ -79,20 +89,18 @@ namespace ECommerce.Tests
         public void CriarPedido_Erro_BancoDeDados()
         {
             //Arrange
-            Mock<IPedidoDAL> pedidoDALMock = new Mock<IPedidoDAL>();
-            pedidoDALMock
+            pedidoDALmock
                 .Setup(x => x.Create(It.IsAny<string>()))
                 .Throws(new ApplicationException("Erro ao criar pedido no banco de dados."))
                 .Verifiable();
 
-            Mock<ILog> loggerMock = new Mock<ILog>();
             loggerMock
                 .Setup(x => x.Error("Erro ao criar pedido no banco de dados."))
                 .Verifiable();
 
             //Act
             PedidoManager pedidoManager
-                = new PedidoManager(loggerMock.Object, pedidoDALMock.Object);
+                = new PedidoManager(loggerMock.Object, pedidoDALmock.Object, produtoDALmock.Object);
             
             Action action = ()
                 => pedidoManager.CriarPedido("Fulano de Tal");
@@ -102,29 +110,179 @@ namespace ECommerce.Tests
                 .And
                 .Message.Should().Be("Erro ao criar pedido no banco de dados.");
 
-            Mock.VerifyAll();
+            Mock.Verify(pedidoDALmock);
+            Mock.Verify(loggerMock);
         }
 
 
         [TestMethod]
-        public void CriarPedido_Cliente_Nulo()
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        [DataRow("   ")]
+        public void CriarPedido_Cliente_Nulo(string nomeCliente)
         {
             //Arrange
-            Mock<IPedidoDAL> pedidoDALMock = new Mock<IPedidoDAL>();
-
-            Mock<ILog> loggerMock = new Mock<ILog>();
-
+            
             //Act
             PedidoManager pedidoManager
-                = new PedidoManager(loggerMock.Object, pedidoDALMock.Object);
+                = new PedidoManager(loggerMock.Object, pedidoDALmock.Object, produtoDALmock.Object);
 
             Action action = ()
-                => pedidoManager.CriarPedido(null);
+                => pedidoManager.CriarPedido(nomeCliente);
 
             //Assert
             action.Should().Throw<ArgumentNullException>()
                 .And
                 .ParamName.Should().Be("cliente");
+        }
+
+        [TestMethod]
+        //[ExpectedException(typeof(ArgumentNullException))]
+        public void AdicionarItem_Pedido_Nulo()
+        {
+            //Arrange
+
+            //Act
+            PedidoManager pedidoManager =
+                new PedidoManager(loggerMock.Object, pedidoDALmock.Object, produtoDALmock.Object);
+
+            Action action = () =>
+                pedidoManager.AdicionarItem(null, "abc", 3);
+
+            //Assert
+            action
+                .Should()
+                .Throw<ArgumentNullException>()
+                .And
+                .ParamName.Should().Be("pedido");
+        }
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        [DataRow("    ")]
+        public void AdicionarItem_Codigo_Invalido(string codigo)
+        {
+            //Arrange
+
+            //Act
+            PedidoManager pedidoManager =
+                new PedidoManager(loggerMock.Object, pedidoDALmock.Object, produtoDALmock.Object);
+
+            var pedido = new Pedido();
+
+            Action action = () =>
+                pedidoManager.AdicionarItem(pedido, codigo, 3);
+
+            //Assert
+            action
+                .Should()
+                .Throw<ArgumentException>()
+                .And
+                .ParamName.Should().Be("codigo");
+        }
+
+        [TestMethod]
+        [DataRow(-100)]
+        [DataRow(-7)]
+        [DataRow(-1)]
+        [DataRow(0)]
+        public void AdicionarItem_Quantidade_Invalida(int quantidade)
+        {
+            //Arrange
+
+            //Act
+            PedidoManager pedidoManager =
+                new PedidoManager(loggerMock.Object, pedidoDALmock.Object, produtoDALmock.Object);
+
+            var pedido = new Pedido();
+
+            Action action = () =>
+                pedidoManager.AdicionarItem(pedido, "abc", quantidade);
+
+            //Assert
+            action
+                .Should()
+                .Throw<ArgumentOutOfRangeException>()
+                .And
+                .ParamName.Should().Be("quantidade");
+        }
+
+        [TestMethod]
+        public void AdicionarItem_Produto_Nao_Encontrado()
+        {
+            //Arrange
+            produtoDALmock
+                .Setup(x => x.Get("abc"))
+                .Throws(new KeyNotFoundException())
+                .Verifiable();
+
+            //Act
+            PedidoManager pedidoManager =
+                new PedidoManager(loggerMock.Object, pedidoDALmock.Object, produtoDALmock.Object);
+
+            var pedido = new Pedido();
+            pedido.Status = PedidoStatus.Aberto;
+
+            Action action = () =>
+                pedidoManager.AdicionarItem(pedido, "abc", 123);
+
+            //Assert
+            action
+                .Should()
+                .Throw<ProdutoNaoEncontradoException>();
+
+        }
+
+        [TestMethod]
+        [DataRow(PedidoStatus.Fechado)]
+        [DataRow(PedidoStatus.Nenhum)]
+        public void AdicionarItem_Pedido_Status_Invalido(PedidoStatus pedidoStatus)
+        {
+            //Arrange
+            produtoDALmock
+                .Setup(x => x.Get("abc"))
+                .Returns(new Produto("abc", "Produto ABC", 10.59m))
+                .Verifiable();
+
+            //Act
+            PedidoManager pedidoManager =
+                new PedidoManager(loggerMock.Object, pedidoDALmock.Object, produtoDALmock.Object);
+
+            var pedido = new Pedido();
+            pedido.Status = pedidoStatus;
+
+            Action action = () =>
+                pedidoManager.AdicionarItem(pedido, "abc", 123);
+
+            //Assert
+            action
+                .Should()
+                .Throw<StatusInvalidoException>();
+        }
+
+        [TestMethod]
+        public void AdicionarItem_Success()
+        {
+            //Arrange
+            produtoDALmock
+                .Setup(x => x.Get("abc"))
+                .Returns(new Produto("abc", "Produto ABC", 10.59m))
+                .Verifiable();
+
+            //Act
+            PedidoManager pedidoManager =
+                new PedidoManager(loggerMock.Object, pedidoDALmock.Object, produtoDALmock.Object);
+
+            var pedido = new Pedido();
+            pedido.Status = PedidoStatus.Aberto;
+
+            pedidoManager.AdicionarItem(pedido, "abc", 123);
+
+            //Assert
+            pedido.Itens.Should().HaveCount(1);
         }
     }
 }
@@ -138,7 +296,7 @@ namespace ECommerce.Tests
 //AdicionarItem_Quantidade_Invalida()
 //ProdutoDALMock
 //AdicionarItem_Produto_Nao_Encontrado()
-//AdicionarItem_Success()
 //AdicionarItem_Pedido_Status_Invalido()
+//AdicionarItem_Success()
 
 

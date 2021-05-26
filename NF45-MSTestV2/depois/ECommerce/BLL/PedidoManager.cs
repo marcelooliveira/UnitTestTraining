@@ -22,16 +22,56 @@ namespace ECommerce.BLL
     {
         private readonly ILog log;
         private readonly IPedidoDAL pedidoDAL;
+        private readonly IProdutoDAL produtoDAL;
 
-        public PedidoManager(ILog log, IPedidoDAL pedidoDAL)
+        public PedidoManager(ILog log, IPedidoDAL pedidoDAL, IProdutoDAL produtoDAL)
         {
             this.log = log;
             this.pedidoDAL = pedidoDAL;
+            this.produtoDAL = produtoDAL;
         }
 
         public ItemPedido AdicionarItem(Pedido pedido, string codigo, int quantidade)
         {
-            throw NotImplementedException();
+            if (pedido == null)
+            {
+                throw new ArgumentNullException(nameof(pedido));
+            }
+
+            if (string.IsNullOrWhiteSpace(codigo))
+            {
+                throw new ArgumentException("Erro no código", nameof(codigo));
+            }
+
+            if (quantidade < 1 )
+            {
+                throw new ArgumentOutOfRangeException(nameof(quantidade));
+            }
+
+            if (pedido.Status != PedidoStatus.Aberto)
+            {
+                throw new StatusInvalidoException();
+            }
+
+            Produto produto;
+            try
+            {
+                produto = produtoDAL.Get(codigo);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw new ProdutoNaoEncontradoException("Produto não encontrado", ex);
+            }
+
+            if (pedido.Itens == null)
+            {
+                pedido.Itens = new List<ItemPedido>();
+            }
+
+            ItemPedido item = new ItemPedido(produto.Id, quantidade, produto.PrecoUnitario);
+            pedido.Itens.Add(item);
+
+            return item;
         }
 
         private Exception NotImplementedException()
@@ -54,12 +94,22 @@ namespace ECommerce.BLL
             //};
             //return pedido;
 
-            if (cliente == null)
+            if (string.IsNullOrWhiteSpace(cliente))
             {
                 throw new ArgumentNullException(nameof(cliente));
             }
 
-            var pedido = pedidoDAL.Create(cliente);
+            Pedido pedido = null;
+            try
+            {
+                pedido = pedidoDAL.Create(cliente);
+            }
+            catch (Exception ex)
+            {
+                log.Error("Erro ao criar pedido no banco de dados.");
+                throw;
+            }
+
             log.Info($"Pedido {pedido.Id} gravado com sucesso.");
             return pedido;
         }
