@@ -128,3 +128,17 @@ namespace ECommerce.Tests
         }
     }
 }
+
+//Verify() com loggerMock & pedidoDALMock
+//try-catch em PedidoManager com throw e log.Error
+//CriarPedido_Cliente_Nulo com DataRow e valores inválidos
+//TestInitialize() com loggerMock & pedidoDALMock
+//AdicionarItem_Pedido_Nulo()
+//AdicionarItem_Codigo_Invalido()
+//AdicionarItem_Quantidade_Invalida()
+//ProdutoDALMock
+//AdicionarItem_Produto_Nao_Encontrado()
+//AdicionarItem_Success()
+//AdicionarItem_Pedido_Status_Invalido()
+
+
